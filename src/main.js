@@ -38,6 +38,7 @@ const copyCodeButton = document.querySelector('#copy-code');
 let drawing = false;
 let revealed = false;
 let lastPoint = null;
+let activePointerId = null;
 let lastSoundAt = 0;
 let lastHapticAt = 0;
 let lastProgressAt = 0;
@@ -279,31 +280,53 @@ function resetScratch() {
 }
 
 canvas.addEventListener('pointerdown', (event) => {
-  if (revealed) return;
+  if (revealed || activePointerId !== null) return;
   ensureAudio();
   drawing = true;
+  activePointerId = event.pointerId;
+
+  try {
+    canvas.setPointerCapture(event.pointerId);
+  } catch {
+    // The document-level touch guard still keeps the scratch gesture stable.
+  }
+
   lastPoint = pointFromEvent(event);
   scratchAt(lastPoint);
   event.preventDefault();
 });
 
 canvas.addEventListener('pointermove', (event) => {
-  if (!drawing || revealed) return;
+  if (!drawing || revealed || event.pointerId !== activePointerId) return;
   scratchAt(pointFromEvent(event));
   event.preventDefault();
 });
 
 function stopDrawing(event) {
-  if (!drawing) return;
+  if (!drawing || (activePointerId !== null && event.pointerId !== activePointerId)) return;
+
+  const pointerId = activePointerId;
   drawing = false;
+  activePointerId = null;
   lastPoint = null;
+
+  if (pointerId !== null && canvas.hasPointerCapture?.(pointerId)) {
+    canvas.releasePointerCapture(pointerId);
+  }
+
   updateProgress();
+}
+
+function preventPageScrollWhileScratching(event) {
+  if (drawing) event.preventDefault();
 }
 
 canvas.addEventListener('pointerup', stopDrawing);
 canvas.addEventListener('pointercancel', stopDrawing);
+canvas.addEventListener('lostpointercapture', stopDrawing);
 window.addEventListener('pointerup', stopDrawing);
 window.addEventListener('pointercancel', stopDrawing);
+document.addEventListener('touchmove', preventPageScrollWhileScratching, { passive: false });
 canvas.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault();

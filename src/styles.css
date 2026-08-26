@@ -322,6 +322,8 @@ h1 {
   height: 36.7%;
   overflow: hidden;
   clip-path: polygon(3% 0, 97% 0, 89% 100%, 11% 100%);
+  overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .scratch-zone canvas,
@@ -336,6 +338,8 @@ h1 {
   z-index: 2;
   cursor: url('/assets/spade-cursor.png') 10 86, crosshair;
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
   transition: opacity 550ms ease;
 }
 
