@@ -44,10 +44,7 @@
 
           <div class="instruction">
             <span class="gesture-icon" aria-hidden="true">
-              <svg viewBox="0 0 64 64">
-                <path d="M26 34V18a4 4 0 0 1 8 0v13-8a4 4 0 0 1 8 0v10-6a4 4 0 0 1 8 0v14c0 11-7 17-18 17h-3c-6 0-10-3-13-8L9 38a4 4 0 0 1 7-4l6 8V23a4 4 0 0 1 8 0" />
-                <path d="M15 18c2-7 8-12 16-13M10 24c0-13 9-23 21-24" />
-              </svg>
+              <i data-lucide="pointer"></i>
             </span>
             <span>Húzd végig az ujjad vagy az egered a vödör címkéjén.</span>
           </div>
@@ -87,8 +84,10 @@
 
               <div class="scratch-pointer" aria-hidden="true">
                 <svg viewBox="0 0 120 48">
-                  <path d="M112 24H12" />
-                  <path d="m26 10-14 14 14 14" />
+                  <path class="pointer-outline" d="M112 24H12" />
+                  <path class="pointer-outline" d="m26 10-14 14 14 14" />
+                  <path class="pointer-core" d="M112 24H12" />
+                  <path class="pointer-core" d="m26 10-14 14 14 14" />
                 </svg>
               </div>
             </div>
@@ -97,6 +96,7 @@
           <div class="scratch-meta">
             <div class="progress-wrap" aria-hidden="true">
               <span class="progress-bar" id="progress-bar"></span>
+              <img class="progress-mole" src="/assets/mole-progress.png" alt="" />
             </div>
             <p id="scratch-status" aria-live="polite">A címke még érintetlen.</p>
             <button class="text-button" id="reveal-accessible" type="button">
@@ -175,6 +175,33 @@
         </div>
       </section>
     </main>
+
+    <dialog class="reward-dialog" id="reward-dialog" aria-labelledby="reward-dialog-title">
+      <div class="reward-dialog-inner">
+        <button class="dialog-close" id="dialog-close" type="button" aria-label="Ablak bezárása">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+        </button>
+
+        <svg class="dialog-leaf" viewBox="0 0 80 80" aria-hidden="true">
+          <path d="M16 64C35 47 45 30 62 12M25 54C18 39 21 28 37 25c4 15-1 26-12 29ZM44 34c1-15 8-23 24-22-1 15-9 22-24 22Z" />
+        </svg>
+
+        <span class="dialog-kicker">Sikerült!</span>
+        <h2 id="reward-dialog-title"><strong>−15%</strong> kedvezmény</h2>
+        <p class="dialog-copy">Ezt a demókódot a vásárlásnál használhatnád fel:</p>
+
+        <div class="demo-code" aria-label="Generált demó kedvezménykód">
+          <span id="demo-code-value">----</span>
+          <button id="copy-code" type="button">Kód másolása</button>
+        </div>
+
+        <p class="demo-disclaimer">Ez egy bemutató kód, valódi vásárlásnál nem érvényes.</p>
+        <button class="primary-button dialog-primary" id="dialog-continue" type="button">
+          Folytatom az oldalon
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
+        </button>
+      </div>
+    </dialog>
 
     <footer class="site-footer">
       <div class="footer-brand">

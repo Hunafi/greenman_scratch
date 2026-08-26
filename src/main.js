@@ -1,5 +1,13 @@
 import QRCode from 'qrcode';
+import { createIcons, Pointer } from 'lucide';
 import './styles.css';
+
+createIcons({
+  icons: { Pointer },
+  attrs: {
+    'stroke-width': 2.2,
+  },
+});
 
 const crop = {
   left: 0.293,
@@ -15,20 +23,29 @@ const zone = document.querySelector('#scratch-zone');
 const stage = document.querySelector('#scratch-stage');
 const status = document.querySelector('#scratch-status');
 const progressBar = document.querySelector('#progress-bar');
+const progressWrap = document.querySelector('.progress-wrap');
 const rewardActions = document.querySelector('#reward-actions');
 const revealButton = document.querySelector('#reveal-accessible');
 const resetButton = document.querySelector('#reset-scratch');
 const soundToggle = document.querySelector('#sound-toggle');
 const startButton = document.querySelector('#start-scratch');
+const rewardDialog = document.querySelector('#reward-dialog');
+const dialogClose = document.querySelector('#dialog-close');
+const dialogContinue = document.querySelector('#dialog-continue');
+const demoCodeValue = document.querySelector('#demo-code-value');
+const copyCodeButton = document.querySelector('#copy-code');
 
 let drawing = false;
 let revealed = false;
 let lastPoint = null;
 let lastSoundAt = 0;
 let lastHapticAt = 0;
+let lastProgressAt = 0;
 let soundEnabled = true;
 let audioContext = null;
 let noiseBuffer = null;
+let lastDemoCode = '';
+let rewardDialogTimer = null;
 
 function getPixelRatio() {
   return Math.min(window.devicePixelRatio || 1, 2);
@@ -121,6 +138,10 @@ function scratchAt(point) {
   playScratchSound();
 
   const now = performance.now();
+  if (now - lastProgressAt > 130) {
+    updateProgress();
+    lastProgressAt = now;
+  }
   if ('vibrate' in navigator && now - lastHapticAt > 110) {
     navigator.vibrate(7);
     lastHapticAt = now;
@@ -141,11 +162,55 @@ function erasedPercentage() {
   return sampled ? (transparent / sampled) * 100 : 0;
 }
 
-function updateProgress() {
+function setProgress(percent) {
+  const safePercent = Math.min(100, Math.max(0, percent));
+  progressBar.style.width = `${safePercent}%`;
+  progressWrap.style.setProperty('--progress', `${safePercent}%`);
+}
+
+function generateDemoCode() {
+  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const digits = '23456789';
+  let code = '';
+  do {
+    const randomValues = new Uint32Array(8);
+    if (globalThis.crypto?.getRandomValues) crypto.getRandomValues(randomValues);
+    else randomValues.forEach((_, index) => { randomValues[index] = Math.floor(Math.random() * 2 ** 32); });
+
+    const characters = [
+      letters[randomValues[0] % letters.length],
+      letters[randomValues[1] % letters.length],
+      letters[randomValues[2] % letters.length],
+      digits[randomValues[3] % digits.length],
+    ];
+
+    for (let index = characters.length - 1; index > 0; index -= 1) {
+      const swapIndex = randomValues[4 + index] % (index + 1);
+      [characters[index], characters[swapIndex]] = [characters[swapIndex], characters[index]];
+    }
+    code = characters.join('');
+  } while (code === lastDemoCode);
+  lastDemoCode = code;
+  return code;
+}
+
+function openRewardDialog() {
+  demoCodeValue.textContent = generateDemoCode();
+  copyCodeButton.textContent = 'Kód másolása';
+  document.body.classList.add('dialog-open');
+  if (!rewardDialog.open) rewardDialog.showModal();
+}
+
+function closeRewardDialog() {
+  if (rewardDialog.open) rewardDialog.close();
+  document.body.classList.remove('dialog-open');
+}
+
+function updateProgress(allowReveal = true) {
   if (revealed) return;
   const percent = Math.min(100, erasedPercentage());
-  progressBar.style.width = `${percent}%`;
-  if (percent > 44) revealReward();
+  setProgress(percent);
+  if (percent > 44 && allowReveal) revealReward();
   else if (percent > 22) status.textContent = 'Már majdnem megvan… kaparj még egy kicsit!';
   else if (percent > 3) status.textContent = 'Jól haladsz — folytasd a kaparást!';
 }
@@ -156,22 +221,26 @@ function revealReward() {
   drawing = false;
   stage.classList.add('is-revealed');
   canvas.style.pointerEvents = 'none';
-  progressBar.style.width = '100%';
+  setProgress(100);
   status.textContent = 'Megtaláltad: −15% kedvezmény!';
   revealButton.hidden = true;
   rewardActions.hidden = false;
 
   if ('vibrate' in navigator) navigator.vibrate([25, 45, 55]);
+  window.clearTimeout(rewardDialogTimer);
+  rewardDialogTimer = window.setTimeout(openRewardDialog, 520);
 }
 
 function resetScratch() {
   revealed = false;
   stage.classList.remove('is-revealed');
   canvas.style.pointerEvents = '';
-  progressBar.style.width = '0%';
+  setProgress(0);
   status.textContent = 'A címke még érintetlen.';
   revealButton.hidden = false;
   rewardActions.hidden = true;
+  window.clearTimeout(rewardDialogTimer);
+  closeRewardDialog();
   sizeCanvas();
   canvas.focus({ preventScroll: true });
 }
@@ -181,7 +250,6 @@ canvas.addEventListener('pointerdown', (event) => {
   ensureAudio();
   drawing = true;
   lastPoint = pointFromEvent(event);
-  canvas.setPointerCapture(event.pointerId);
   scratchAt(lastPoint);
   event.preventDefault();
 });
@@ -196,14 +264,13 @@ function stopDrawing(event) {
   if (!drawing) return;
   drawing = false;
   lastPoint = null;
-  if (event?.pointerId !== undefined && canvas.hasPointerCapture(event.pointerId)) {
-    canvas.releasePointerCapture(event.pointerId);
-  }
   updateProgress();
 }
 
 canvas.addEventListener('pointerup', stopDrawing);
 canvas.addEventListener('pointercancel', stopDrawing);
+window.addEventListener('pointerup', stopDrawing);
+window.addEventListener('pointercancel', stopDrawing);
 canvas.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault();
@@ -228,6 +295,20 @@ startButton.addEventListener('click', () => {
 
 revealButton.addEventListener('click', revealReward);
 resetButton.addEventListener('click', resetScratch);
+dialogClose.addEventListener('click', closeRewardDialog);
+dialogContinue.addEventListener('click', closeRewardDialog);
+rewardDialog.addEventListener('close', () => document.body.classList.remove('dialog-open'));
+rewardDialog.addEventListener('click', (event) => {
+  if (event.target === rewardDialog) closeRewardDialog();
+});
+copyCodeButton.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(demoCodeValue.textContent);
+    copyCodeButton.textContent = 'Másolva ✓';
+  } catch {
+    copyCodeButton.textContent = 'Jelöld ki a kódot';
+  }
+});
 
 if (image.complete) sizeCanvas();
 else image.addEventListener('load', sizeCanvas, { once: true });
@@ -239,7 +320,7 @@ const resizeObserver = new ResizeObserver(() => {
 resizeObserver.observe(zone);
 
 const qrCanvas = document.querySelector('#qr-code');
-const qrTarget = window.location.href.split('#')[0];
+const qrTarget = new URL('/', window.location.origin).href;
 QRCode.toCanvas(qrCanvas, qrTarget, {
   width: 288,
   margin: 2,
