@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="hu">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#015201" />
+    <meta
+      name="description"
+      content="Kapard le a Greenman AlgiNova vödrének címkéjét, és fedezd fel a kedvezményedet."
+    />
+    <title>Greenman AlgiNova – Kapard le a kedvezményt</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#scratch-experience">Ugrás a kaparáshoz</a>
+
+    <header class="site-header">
+      <a class="brand" href="https://greenman.hu/" aria-label="Greenman főoldal">
+        <img src="/assets/greenman-logo.png" alt="Greenman" />
+      </a>
+
+      <button class="sound-toggle" id="sound-toggle" type="button" aria-label="Hang bekapcsolva" aria-pressed="true">
+        <svg class="sound-on" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 10v4h4l5 4V6L8 10H4Z" />
+          <path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" />
+        </svg>
+        <svg class="sound-off" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 10v4h4l5 4V6L8 10H4Z" />
+          <path d="m17 10 4 4m0-4-4 4" />
+        </svg>
+        <span>Hang bekapcsolva</span>
+      </button>
+    </header>
+
+    <main>
+      <section class="hero" id="scratch-experience">
+        <div class="hero-copy">
+          <svg class="hero-leaf" viewBox="0 0 80 80" aria-hidden="true">
+            <path d="M16 64C35 47 45 30 62 12M25 54C18 39 21 28 37 25c4 15-1 26-12 29ZM44 34c1-15 8-23 24-22-1 15-9 22-24 22Z" />
+          </svg>
+          <h1>Kapard le<br />a kedvezményed.</h1>
+          <p class="hero-intro">
+            Egy mozdulat, és kiderül, milyen kedvezmény vár a Greenman AlgiNova alatt.
+          </p>
+
+          <div class="instruction">
+            <span class="gesture-icon" aria-hidden="true">
+              <svg viewBox="0 0 64 64">
+                <path d="M26 34V18a4 4 0 0 1 8 0v13-8a4 4 0 0 1 8 0v10-6a4 4 0 0 1 8 0v14c0 11-7 17-18 17h-3c-6 0-10-3-13-8L9 38a4 4 0 0 1 7-4l6 8V23a4 4 0 0 1 8 0" />
+                <path d="M15 18c2-7 8-12 16-13M10 24c0-13 9-23 21-24" />
+              </svg>
+            </span>
+            <span>Húzd végig az ujjad vagy az egered a vödör címkéjén.</span>
+          </div>
+
+          <button class="primary-button" id="start-scratch" type="button">
+            <span>Kezdem a kaparást</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 12h14m-5-5 5 5-5 5" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="scratch-column">
+          <div class="scratch-frame">
+            <div class="scratch-stage" id="scratch-stage">
+              <img
+                class="garden-photo"
+                id="garden-photo"
+                src="/assets/alginova-garden.png"
+                alt="Greenman AlgiNova talajjavító egy virágos kertben"
+              />
+
+              <div class="scratch-zone" id="scratch-zone">
+                <div class="reward" aria-hidden="true">
+                  <span class="reward-kicker">Megtaláltad</span>
+                  <strong>−15%</strong>
+                  <span class="reward-label">kedvezmény</span>
+                </div>
+                <canvas
+                  id="scratch-canvas"
+                  tabindex="0"
+                  role="img"
+                  aria-label="Kaparható AlgiNova címke. Húzd rajta végig az ujjad vagy az egered. Billentyűzettel Enter vagy Szóköz felfedi a kedvezményt."
+                  aria-describedby="scratch-status"
+                ></canvas>
+              </div>
+
+              <div class="scratch-pointer" aria-hidden="true">
+                <svg viewBox="0 0 120 48">
+                  <path d="M112 24H12" />
+                  <path d="m26 10-14 14 14 14" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="scratch-meta">
+            <div class="progress-wrap" aria-hidden="true">
+              <span class="progress-bar" id="progress-bar"></span>
+            </div>
+            <p id="scratch-status" aria-live="polite">A címke még érintetlen.</p>
+            <button class="text-button" id="reveal-accessible" type="button">
+              Kedvezmény felfedése kaparás nélkül
+            </button>
+            <div class="reward-actions" id="reward-actions" hidden>
+              <a class="primary-button compact" href="https://greenman.hu/product/greenman-alginova/">
+                Megnézem a terméket
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h14m-5-5 5 5-5 5" />
+                </svg>
+              </a>
+              <button class="text-button" id="reset-scratch" type="button">Újra kaparom</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="product-story" aria-labelledby="product-heading">
+        <div class="product-visual">
+          <img src="/assets/alginova-official.jpg" alt="Greenman AlgiNova termékcsomagolás" loading="lazy" />
+        </div>
+
+        <div class="product-copy">
+          <svg class="section-leaf" viewBox="0 0 80 80" aria-hidden="true">
+            <path d="M16 64C35 47 45 30 62 12M25 54C18 39 21 28 37 25c4 15-1 26-12 29ZM44 34c1-15 8-23 24-22-1 15-9 22-24 22Z" />
+          </svg>
+          <h2 id="product-heading">Természetes segítség a talajnak.</h2>
+          <p>
+            A Greenman AlgiNova természetes összetevőkre épülő talajjavító, gazdag szerves- és ásványianyag-tartalommal.
+          </p>
+
+          <ul class="benefit-list">
+            <li><span>01</span><strong>Tápanyag-utánpótlás</strong></li>
+            <li><span>02</span><strong>Talajjavítás</strong></li>
+            <li><span>03</span><strong>Kerttől a cserepes növényekig</strong></li>
+          </ul>
+
+          <a class="underlined-link" href="https://greenman.hu/product/greenman-alginova/">
+            Megnézem az AlgiNovát
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
+          </a>
+        </div>
+      </section>
+
+      <aside class="review-strip" aria-label="Vásárlói vélemény">
+        <span class="quote-mark" aria-hidden="true">“</span>
+        <blockquote>
+          <p>„Talaj javítására és a növények optimális táplálására adom évek óta, hálásak érte.”</p>
+          <footer>Gézáné Mátrai, megerősített tulajdonos</footer>
+        </blockquote>
+        <a href="https://greenman.hu/product/greenman-alginova/#reviews">11 vásárlói értékelés</a>
+      </aside>
+
+      <section class="qr-section" aria-labelledby="qr-heading">
+        <div class="qr-visual">
+          <div class="qr-card">
+            <canvas id="qr-code" aria-label="QR-kód ehhez az oldalhoz"></canvas>
+          </div>
+          <div class="phone-preview" aria-hidden="true">
+            <div class="phone-speaker"></div>
+            <span class="phone-logo">greenman</span>
+            <strong>Kapard le<br />a kedvezményed.</strong>
+            <img src="/assets/alginova-garden.png" alt="" loading="lazy" />
+            <span class="phone-button">Kezdem a kaparást</span>
+          </div>
+        </div>
+
+        <div class="qr-copy">
+          <svg class="section-leaf" viewBox="0 0 80 80" aria-hidden="true">
+            <path d="M16 64C35 47 45 30 62 12M25 54C18 39 21 28 37 25c4 15-1 26-12 29ZM44 34c1-15 8-23 24-22-1 15-9 22-24 22Z" />
+          </svg>
+          <h2 id="qr-heading">Inkább mobilon kaparnál?</h2>
+          <p>Olvasd be a kódot a telefonoddal, és folytasd ott, ahol az élmény igazán kézre áll.</p>
+          <span class="qr-note">A QR-kód erre az oldalra vezet.</span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-brand">
+        <img src="/assets/greenman-logo.png" alt="Greenman" />
+        <span>Greenman AlgiNova · Talajjavító</span>
+      </div>
+      <nav aria-label="Lábléc">
+        <a href="https://greenman.hu/product/greenman-alginova/">Termékoldal</a>
+        <a href="https://greenman.hu/">greenman.hu</a>
+      </nav>
+    </footer>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
