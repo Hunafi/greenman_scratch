@@ -324,7 +324,7 @@ h1 {
 
 .scratch-zone canvas {
   z-index: 2;
-  cursor: url('/assets/spade-cursor.png') 5 43, crosshair;
+  cursor: url('/assets/spade-cursor.png') 10 86, crosshair;
   touch-action: none;
   transition: opacity 550ms ease;
 }
