@@ -319,9 +319,9 @@ const resizeObserver = new ResizeObserver(() => {
 });
 resizeObserver.observe(zone);
 
-const qrCanvas = document.querySelector('#qr-code');
+const qrImage = document.querySelector('#qr-code');
 const qrTarget = new URL('/', window.location.origin).href;
-QRCode.toCanvas(qrCanvas, qrTarget, {
+QRCode.toDataURL(qrTarget, {
   width: 288,
   margin: 2,
   color: {
@@ -329,6 +329,10 @@ QRCode.toCanvas(qrCanvas, qrTarget, {
     light: '#ffffff',
   },
   errorCorrectionLevel: 'H',
+}).then((qrDataUrl) => {
+  qrImage.src = qrDataUrl;
+  qrImage.classList.add('is-ready');
 }).catch(() => {
-  qrCanvas.setAttribute('aria-label', 'A QR-kód nem tölthető be.');
+  qrImage.alt = 'A QR-kód nem tölthető be.';
+  qrImage.classList.add('has-error');
 });
