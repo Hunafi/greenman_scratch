@@ -47,6 +47,17 @@ let noiseBuffer = null;
 let lastDemoCode = '';
 let rewardDialogTimer = null;
 
+const compactScratchQuery = window.matchMedia('(max-width: 560px)');
+const coarsePointerQuery = window.matchMedia('(pointer: coarse)');
+
+function usesCompactScratch() {
+  return compactScratchQuery.matches || coarsePointerQuery.matches;
+}
+
+function getRevealThreshold() {
+  return usesCompactScratch() ? 68 : 44;
+}
+
 function getPixelRatio() {
   return Math.min(window.devicePixelRatio || 1, 2);
 }
@@ -77,7 +88,9 @@ function sizeCanvas() {
   context.globalCompositeOperation = 'destination-out';
   context.lineCap = 'round';
   context.lineJoin = 'round';
-  context.lineWidth = Math.max(34, zone.clientWidth * 0.13);
+  context.lineWidth = usesCompactScratch()
+    ? Math.max(22, zone.clientWidth * 0.095)
+    : Math.max(34, zone.clientWidth * 0.13);
   zone.classList.add('is-ready');
 }
 
@@ -198,20 +211,40 @@ function openRewardDialog() {
   demoCodeValue.textContent = generateDemoCode();
   copyCodeButton.textContent = 'Kód másolása';
   document.body.classList.add('dialog-open');
-  if (!rewardDialog.open) rewardDialog.showModal();
+  document.body.classList.remove('dialog-fallback-open');
+
+  if (rewardDialog.open) return;
+
+  try {
+    if (typeof rewardDialog.showModal !== 'function') throw new Error('Dialog API is unavailable');
+    rewardDialog.showModal();
+  } catch {
+    rewardDialog.setAttribute('open', '');
+    rewardDialog.classList.add('is-fallback');
+    document.body.classList.add('dialog-fallback-open');
+  }
+
+  dialogClose.focus({ preventScroll: true });
 }
 
 function closeRewardDialog() {
-  if (rewardDialog.open) rewardDialog.close();
-  document.body.classList.remove('dialog-open');
+  if (rewardDialog.open) {
+    if (typeof rewardDialog.close === 'function') rewardDialog.close();
+    else rewardDialog.removeAttribute('open');
+  }
+  rewardDialog.classList.remove('is-fallback');
+  document.body.classList.remove('dialog-open', 'dialog-fallback-open');
 }
 
-function updateProgress(allowReveal = true) {
+function updateProgress() {
   if (revealed) return;
   const percent = Math.min(100, erasedPercentage());
+  const revealThreshold = getRevealThreshold();
   setProgress(percent);
-  if (percent > 44 && allowReveal) revealReward();
-  else if (percent > 22) status.textContent = 'Már majdnem megvan… kaparj még egy kicsit!';
+
+  if (percent >= revealThreshold && !drawing) revealReward();
+  else if (percent >= revealThreshold) status.textContent = 'Megvan — engedd el a felfedéshez!';
+  else if (percent > revealThreshold * 0.55) status.textContent = 'Már majdnem megvan… kaparj még egy kicsit!';
   else if (percent > 3) status.textContent = 'Jól haladsz — folytasd a kaparást!';
 }
 
@@ -222,13 +255,13 @@ function revealReward() {
   stage.classList.add('is-revealed');
   canvas.style.pointerEvents = 'none';
   setProgress(100);
-  status.textContent = 'Megtaláltad: −15% kedvezmény!';
+  status.textContent = 'Megtaláltad: −10% kedvezmény!';
   revealButton.hidden = true;
   rewardActions.hidden = false;
 
   if ('vibrate' in navigator) navigator.vibrate([25, 45, 55]);
   window.clearTimeout(rewardDialogTimer);
-  rewardDialogTimer = window.setTimeout(openRewardDialog, 520);
+  rewardDialogTimer = window.setTimeout(openRewardDialog, 420);
 }
 
 function resetScratch() {
@@ -297,7 +330,10 @@ revealButton.addEventListener('click', revealReward);
 resetButton.addEventListener('click', resetScratch);
 dialogClose.addEventListener('click', closeRewardDialog);
 dialogContinue.addEventListener('click', closeRewardDialog);
-rewardDialog.addEventListener('close', () => document.body.classList.remove('dialog-open'));
+rewardDialog.addEventListener('close', () => {
+  rewardDialog.classList.remove('is-fallback');
+  document.body.classList.remove('dialog-open', 'dialog-fallback-open');
+});
 rewardDialog.addEventListener('click', (event) => {
   if (event.target === rewardDialog) closeRewardDialog();
 });
